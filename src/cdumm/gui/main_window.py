@@ -1573,7 +1573,25 @@ class MainWindow(QMainWindow):
         ab_layout.addWidget(apply_btn)
 
         launch_btn = QPushButton("Open Steam" if __import__("platform").system() == "Linux" else tr("action_bar.launch_game"))
+        is_linux = __import__("platform").system() == "Linux"
+        launch_btn = QPushButton("Open Steam" if is_linux else tr("action_bar.launch_game"))
         launch_btn.setObjectName("launchBtn")
+
+        if is_linux:
+            # Nur die Farben ändern, Abstände (Padding) weglassen, damit das Layout bleibt
+            launch_btn.setStyleSheet("""
+                QPushButton#launchBtn {
+                    background-color: #1b2838;
+                    color: #66c0f4;
+                    font-weight: bold;
+                    border: 1px solid #101822;
+                }
+                QPushButton#launchBtn:hover {
+                    background-color: #2a475e;
+                    color: white;
+                }
+            """)
+
         launch_btn.clicked.connect(self._on_launch_game)
         ab_layout.addWidget(launch_btn)
 
