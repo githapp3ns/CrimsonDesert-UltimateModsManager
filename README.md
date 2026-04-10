@@ -157,11 +157,11 @@ This fork provides native support for Linux systems
 - **Syntax Fixes:** Fixed critical Python errors.
 
 ### Installation & Usage:
-1. **Requirements**
+1. **Requirements:**
    ```bash
    pip install PySide6 requests pillow
    
-2. **Run the Manager**
+2. **Run the Manager:**
    Navigate to the src folder and run:   
    ```bash
    set -x PYTHONPATH (pwd)
