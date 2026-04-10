@@ -1515,10 +1515,10 @@ class MainWindow(QMainWindow):
         about_v.addWidget(links_label)
 
         for text, url in [
-            ("GitHub Releases — Download Latest", "https://github.com/faisalkindi/CrimsonDesert-UltimateModsManager/releases"),
-            ("NexusMods Page", "https://www.nexusmods.com/crimsondesert/mods/207"),
-            ("NexusMods Posts & Discussion", "https://www.nexusmods.com/crimsondesert/mods/207?tab=posts"),
-            ("Report a Bug", "https://www.nexusmods.com/crimsondesert/mods/207?tab=bugs"),
+            ("GitHub Releases — Download Latest", "https://github.com/https://api.github.com/repos/githapp3ns/CrimsonDesert-UltimateModsManager/releases/latest/releases"),
+            ("Github (Original Author)", "https://github.com/faisalkindi/CrimsonDesert-UltimateModsManager"),
+            ("NexusMods Page (Original Author)", "https://www.nexusmods.com/crimsondesert/mods/207"),
+
         ]:
             link_btn = QPushButton(text)
             link_btn.setFixedHeight(36)
@@ -1529,7 +1529,7 @@ class MainWindow(QMainWindow):
         about_v.addStretch()
 
         # Credits
-        credits = QLabel("by kindiboy")
+        credits = QLabel("by kindiboy | Optimized for Linux by githapp3ns")
         credits.setStyleSheet("color: #555; font-size: 11px;")
         credits.setAlignment(Qt.AlignmentFlag.AlignCenter)
         about_v.addWidget(credits)

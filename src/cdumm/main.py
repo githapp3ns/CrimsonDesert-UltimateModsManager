@@ -48,12 +48,58 @@ def _flush_logs():
         except Exception:
             pass
 
-
 def _global_exception_handler(exc_type, exc_value, exc_tb):
+    import logging
+    import sys
+    import os
+    import subprocess
+    import time
+    from PyQt6.QtWidgets import QMessageBox, QApplication
+
+    # 1. Loggen
     logger = logging.getLogger("CRASH")
     logger.critical("Unhandled exception", exc_info=(exc_type, exc_value, exc_tb))
-    _flush_logs()
-    sys.__excepthook__(exc_type, exc_value, exc_tb)
+
+    # 2. GUI sicherstellen
+    app = QApplication.instance()
+    if not app:
+        app = QApplication(sys.argv)
+
+    # 3. Dialog
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Icon.Critical)
+    msg.setWindowTitle("CDUMM - Unexpected Error")
+    msg.setText("The application has encountered a critical error.")
+    msg.setInformativeText(f"Error: {exc_value}\n\nPlease check the logs in your local share folder.")
+
+    open_log_btn = msg.addButton("Open Log Folder", QMessageBox.ButtonRole.ActionRole)
+    msg.addButton("Close", QMessageBox.ButtonRole.RejectRole)
+
+    msg.exec()
+
+    # 4. Button-Logik mit manuellem Pfad
+    if msg.clickedButton() == open_log_btn:
+        try:
+            # Wir bauen den Pfad direkt: ~/.local/share/cdumm
+            # expanduser macht aus '~' automatisch '/home/deck'
+            log_path = os.path.expanduser("~/.local/share/cdumm")
+
+            if os.path.exists(log_path):
+                # 'setsid' sorgt dafür, dass Dolphin in einem komplett eigenen Prozess startet
+                # Das ist noch stärker als start_new_session
+                subprocess.Popen(["xdg-open", log_path], preexec_fn=os.setsid)
+                time.sleep(0.2) # Ganz kurzer Moment für das System
+            else:
+                # Falls der Ordner anders heißt, versuchen wir es mit dem Standard
+                # (Hier ggf. den genauen Ordnernamen aus deiner Konstanten-Datei prüfen!)
+                alternative_path = os.path.expanduser("~/.local/share/CrimsonDesert-UltimateModsManager")
+                if os.path.exists(alternative_path):
+                    subprocess.Popen(["xdg-open", alternative_path], preexec_fn=os.setsid)
+        except Exception as e:
+            print(f"Error opening folder: {e}")
+
+    sys.exit(1)
+
 
 
 def _thread_exception_handler(args):
@@ -68,11 +114,16 @@ def _thread_exception_handler(args):
 
 def main() -> int:
     setup_logging(APP_DATA_DIR)
+
+    # Deaktiviert die automatischen Fehler-Dialoge, um Fehlmeldungen beim Original-Autor zu verhindern:
     sys.excepthook = _global_exception_handler
     threading.excepthook = _thread_exception_handler
 
     logger = logging.getLogger(__name__)
     logger.info("Starting Crimson Desert Ultimate Mods Manager")
+
+    #Crash Test
+    #raise Exception("Testing the new Linux Crash Handler")
 
     # Initialize i18n (English default, reloads with user preference after DB is ready)
     from cdumm.i18n import load as load_i18n
