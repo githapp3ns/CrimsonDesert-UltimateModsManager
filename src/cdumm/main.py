@@ -1,21 +1,31 @@
 import sys
 import logging
+import platform
 import threading
 from pathlib import Path
 from logging.handlers import RotatingFileHandler
 
-APP_DATA_DIR = Path.home() / "AppData" / "Local" / "cdumm"
+# Pfad-Optimierung für Linux und Windows
+if platform.system() == "Linux":
+    # Standard-Pfad für Linux: ~/.local/share/cdumm
+    APP_DATA_DIR = Path.home() / ".local" / "share" / "cdumm"
+else:
+    # Standard-Pfad für Windows: ~/AppData/Local/cdumm
+    APP_DATA_DIR = Path.home() / "AppData" / "Local" / "cdumm"
 
 
 def setup_logging(app_data: Path) -> None:
+    # Erstellt den Ordner (inklusive versteckter Ordner wie .local)
     app_data.mkdir(parents=True, exist_ok=True)
     log_file = app_data / "cdumm.log"
 
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.DEBUG)
 
-    fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
+    # Formatierung für bessere Lesbarkeit
+    fmt = logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 
+    # Datei-Handler: 10MB Limit, behält ein Backup
     file_handler = RotatingFileHandler(
         log_file, maxBytes=10 * 1024 * 1024, backupCount=1, encoding="utf-8"
     )
@@ -23,11 +33,13 @@ def setup_logging(app_data: Path) -> None:
     file_handler.setFormatter(fmt)
     root_logger.addHandler(file_handler)
 
+    # Konsole bleibt sauber mit INFO-Level
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.INFO)
     console_handler.setFormatter(fmt)
     root_logger.addHandler(console_handler)
 
+    logging.info(f"Logging initialisiert. Pfad: {log_file}")
 
 def _flush_logs():
     for handler in logging.getLogger().handlers:
