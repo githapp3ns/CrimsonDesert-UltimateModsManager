@@ -1572,7 +1572,7 @@ class MainWindow(QMainWindow):
         apply_btn.clicked.connect(self._on_apply)
         ab_layout.addWidget(apply_btn)
 
-        launch_btn = QPushButton(tr("action_bar.launch_game"))
+        launch_btn = QPushButton("Open Steam" if __import__("platform").system() == "Linux" else tr("action_bar.launch_game"))
         launch_btn.setObjectName("launchBtn")
         launch_btn.clicked.connect(self._on_launch_game)
         ab_layout.addWidget(launch_btn)
@@ -1608,8 +1608,25 @@ class MainWindow(QMainWindow):
     def _on_launch_game(self) -> None:
         """Launch the game executable."""
         import subprocess
+        import platform
         if not self._game_dir:
             return
+
+        # --- LINUX STEAM LAUNCH LOGIC (Sicherheits-Variante) ---
+        if platform.system() == "Linux":
+            try:
+                # Wir öffnen einfach nur die Steam-App
+                # Der Nutzer startet das Spiel dann manuell in Steam
+                subprocess.Popen(["steam"])
+                self.statusBar().showMessage("Steam wird geöffnet... Bitte starte das Spiel dort.", 5000)
+                self.showMinimized()
+                return
+            except Exception as e:
+                self.statusBar().showMessage(f"Steam konnte nicht gestartet werden: {e}", 10000)
+                return
+
+
+        # --- ORIGINAL WINDOWS LOGIC ---
         exe = self._game_dir / "bin64" / "CrimsonDesert.exe"
         if not exe.exists():
             # Try finding the exe
