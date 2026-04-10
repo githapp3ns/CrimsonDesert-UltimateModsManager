@@ -148,6 +148,26 @@ pyinstaller cdumm.spec --noconfirm
 
 The exe is written to `dist/CDUMM.exe`.
 
+### Option 3: 🐧 Linux Support (Native) 
+This fork provides native support for Linux systems
+
+### Key Fixes:
+- **XDG Compliance:** Logs and configs are stored in `~/.local/share/cdumm`.
+- **Auto-Detection:** Automatically finds Crimson Desert Steam folders (Standard & Flatpak).
+- **Syntax Fixes:** Fixed critical Python errors.
+
+### Installation & Usage:
+1. **Requirements**
+   ```bash
+   pip install PySide6 requests pillow
+   
+2. **Run the Manager**
+   Navigate to the src folder and run:   
+   ```bash
+   set -x PYTHONPATH (pwd)
+   python3 -m cdumm.main
+   
+
 ## How It Works
 
 Crimson Desert stores game data in PAZ archives, indexed by PAMT files, with PAPGT as a hash registry. This manager:
@@ -167,6 +187,7 @@ App config is stored in `%LOCALAPPDATA%\cdumm\cdumm.db`.
 
 ## Requirements
 
+- Linux
 - Windows 10/11
 - Crimson Desert (Steam version recommended, Xbox Game Pass detected but limited)
 
