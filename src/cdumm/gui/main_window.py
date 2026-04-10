@@ -665,7 +665,7 @@ class MainWindow(QMainWindow):
                 "restricted write permissions on Windows.\n\n"
                 "This can cause issues with mod backups and configuration.\n"
                 "If you experience problems, consider moving your Steam\n"
-                "library to a different location (e.g. C:\\SteamLibrary).\n\n"
+                "library to a different location (e.g. C:/SteamLibrary).\n\n"
                 "Steam → Settings → Storage → Add a new library folder"
             )
             config.set("program_files_warned", "1")
@@ -702,7 +702,7 @@ class MainWindow(QMainWindow):
 
             missing = []
             for pamt_path in mod_pamts:
-                full_backup = self._vanilla_dir / pamt_path.replace("/", "\\")
+                full_backup = self._vanilla_dir / pamt_path.replace("/", "/")
                 if not full_backup.exists():
                     missing.append(pamt_path)
 
@@ -715,7 +715,7 @@ class MainWindow(QMainWindow):
             created = 0
             still_missing = []
             for pamt_path in missing:
-                game_file = self._game_dir / pamt_path.replace("/", "\\")
+                game_file = self._game_dir / pamt_path.replace("/", "/")
                 if not game_file.exists():
                     continue
                 snap = self._db.connection.execute(
@@ -737,7 +737,7 @@ class MainWindow(QMainWindow):
                 current_hash, _ = hash_file(game_file)
                 if current_hash == snap[0]:
                     # Game file IS vanilla — create backup silently
-                    backup_path = self._vanilla_dir / pamt_path.replace("/", "\\")
+                    backup_path = self._vanilla_dir / pamt_path.replace("/", "/")
                     backup_path.parent.mkdir(parents=True, exist_ok=True)
                     import shutil
                     shutil.copy2(game_file, backup_path)
@@ -990,7 +990,7 @@ class MainWindow(QMainWindow):
                     if f.name.endswith(".vranges"):
                         rel = f.name[:-len(".vranges")].replace("_", "/")
                     else:
-                        rel = str(f.relative_to(self._vanilla_dir)).replace("\\", "/")
+                        rel = str(f.relative_to(self._vanilla_dir)).replace("/", "/")
                     backed_up.add(rel)
 
             cursor = self._db.connection.execute(
@@ -2277,7 +2277,7 @@ class MainWindow(QMainWindow):
         """Capture size+mtime for all game files — used for fast change detection."""
         stats = {}
         for rel_path in pre_hashes:
-            game_file = self._game_dir / rel_path.replace("/", "\\")
+            game_file = self._game_dir / rel_path.replace("/", "/")
             try:
                 st = game_file.stat()
                 stats[rel_path] = (st.st_size, st.st_mtime)
@@ -2403,12 +2403,12 @@ class MainWindow(QMainWindow):
                         continue  # skip range backups
                     full = Path(dirpath) / fname
                     rel = full.relative_to(vanilla_dir)
-                    files_to_restore.append(str(rel).replace("\\", "/"))
+                    files_to_restore.append(str(rel).replace("/", "/"))
 
         restored = 0
         for rel_path in files_to_restore:
-            vanilla_file = vanilla_dir / rel_path.replace("/", "\\")
-            game_file = self._game_dir / rel_path.replace("/", "\\")
+            vanilla_file = vanilla_dir / rel_path.replace("/", "/")
+            game_file = self._game_dir / rel_path.replace("/", "/")
             if vanilla_file.exists() and game_file.exists():
                 shutil.copy2(vanilla_file, game_file)
                 restored += 1
@@ -3813,7 +3813,7 @@ class MainWindow(QMainWindow):
             if backup.name.endswith(".vranges"):
                 continue
 
-            rel = str(backup.relative_to(self._vanilla_dir)).replace("\\", "/")
+            rel = str(backup.relative_to(self._vanilla_dir)).replace("/", "/")
 
             # Remove orphan backups not in snapshot (mod-created directories)
             if rel not in snap_files:
@@ -3822,7 +3822,7 @@ class MainWindow(QMainWindow):
                 logger.info("Removed orphan vanilla backup: %s (not in snapshot)", rel)
                 continue
 
-            game_file = self._game_dir / rel.replace("/", "\\")
+            game_file = self._game_dir / rel.replace("/", "/")
             if not game_file.exists():
                 continue
 

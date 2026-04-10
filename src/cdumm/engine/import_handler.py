@@ -510,7 +510,7 @@ def _match_game_files(
 
             # Check if it looks like a game file by pattern
             if _GAME_FILE_RE.match(candidate):
-                game_file = game_dir / candidate.replace("/", "\\")
+                game_file = game_dir / candidate.replace("/", "/")
                 is_new = not game_file.exists()
                 matches.append((candidate, f, is_new))
                 matched = True
@@ -1132,7 +1132,7 @@ def import_from_bsdiff(
     encoded_path = stem.replace("_", "/")
     for file_path, file_size in candidates:
         if file_path == encoded_path:
-            game_file = game_dir / file_path.replace("/", "\\")
+            game_file = game_dir / file_path.replace("/", "/")
             if game_file.exists():
                 try:
                     source = game_file.read_bytes()
@@ -1152,7 +1152,7 @@ def import_from_bsdiff(
             if file_size is not None and abs(file_size - new_size) > file_size * 0.5:
                 continue
 
-            game_file = game_dir / file_path.replace("/", "\\")
+            game_file = game_dir / file_path.replace("/", "/")
             if not game_file.exists():
                 continue
 
@@ -1175,11 +1175,11 @@ def import_from_bsdiff(
 
     # Generate our own delta (vanilla → patched) so it goes through the
     # standard apply pipeline with proper byte-range tracking
-    vanilla_file = game_dir / "CDMods" / "vanilla" / target_path.replace("/", "\\")
+    vanilla_file = game_dir / "CDMods" / "vanilla" / target_path.replace("/", "/")
     if vanilla_file.exists():
         vanilla_bytes = vanilla_file.read_bytes()
     else:
-        vanilla_bytes = (game_dir / target_path.replace("/", "\\")).read_bytes()
+        vanilla_bytes = (game_dir / target_path.replace("/", "/")).read_bytes()
 
     our_delta = generate_delta(vanilla_bytes, patched_bytes)
     byte_ranges = get_changed_byte_ranges(vanilla_bytes, patched_bytes)
@@ -1473,8 +1473,8 @@ def _process_extracted_files(
 
             # Use vanilla backup if available (accurate base for delta),
             # fall back to current game file
-            vanilla_backup = game_dir / "CDMods" / "vanilla" / rel_path.replace("/", "\\")
-            vanilla_path = game_dir / rel_path.replace("/", "\\")
+            vanilla_backup = game_dir / "CDMods" / "vanilla" / rel_path.replace("/", "/")
+            vanilla_path = game_dir / rel_path.replace("/", "/")
             vanilla_source = vanilla_backup if vanilla_backup.exists() else vanilla_path
             if not vanilla_source.exists():
                 logger.warning("Vanilla file not found for %s, skipping", rel_path)
@@ -1808,7 +1808,7 @@ def import_script_live(
         if not f.is_file():
             continue
         rel = f.relative_to(vanilla_dir).as_posix()
-        game_file = game_dir / rel.replace("/", "\\")
+        game_file = game_dir / rel.replace("/", "/")
         if game_file.exists():
             h, _ = _hash_file(game_file)
             pre_hashes[rel] = h
@@ -1832,7 +1832,7 @@ def import_script_live(
     logger.info("Scanning for changes after script...")
     changed_files: list[str] = []
     for rel_path, old_hash in pre_hashes.items():
-        abs_path = game_dir / rel_path.replace("/", "\\")
+        abs_path = game_dir / rel_path.replace("/", "/")
         if not abs_path.exists():
             continue
         new_hash, _ = _hash_file(abs_path)
@@ -1855,8 +1855,8 @@ def import_script_live(
     mod_id = cursor.lastrowid
 
     for rel_path in changed_files:
-        vanilla_path = vanilla_dir / rel_path.replace("/", "\\")
-        current_path = game_dir / rel_path.replace("/", "\\")
+        vanilla_path = vanilla_dir / rel_path.replace("/", "/")
+        current_path = game_dir / rel_path.replace("/", "/")
 
         if not vanilla_path.exists():
             logger.warning("No vanilla backup for %s, skipping", rel_path)
@@ -1894,7 +1894,7 @@ def _detect_script_targets(script_path: Path, game_dir: Path) -> list[str]:
     """Read a script's source code to detect which game files it targets.
 
     Looks for PAZ directory patterns (0000-0099) and file references,
-    including os.path.join style references like ("0009") and bare
+    including Path style references like ("0009") and bare
     directory name strings.
     """
     import re
@@ -1908,7 +1908,7 @@ def _detect_script_targets(script_path: Path, game_dir: Path) -> list[str]:
     dirs_found: set[str] = set()
 
     # Look for PAZ directory references like "0008\0.paz" or "0008/0.paz"
-    for match in re.finditer(r'(\d{4})[/\\]+(\d+\.(?:paz|pamt))', content, re.IGNORECASE):
+    for match in re.finditer(r'(\d{4})[//]+(\d+\.(?:paz|pamt))', content, re.IGNORECASE):
         dir_name = match.group(1)
         file_name = match.group(2)
         rel = f"{dir_name}/{file_name}"
@@ -1917,7 +1917,7 @@ def _detect_script_targets(script_path: Path, game_dir: Path) -> list[str]:
             dirs_found.add(dir_name)
 
     # Look for bare PAZ directory references like "0009" in quotes
-    # (catches os.path.join(game_dir, "0009") style)
+    # (catches Path(game_dir, "0009") style)
     for match in re.finditer(r'["\'](\d{4})["\']', content):
         dir_name = match.group(1)
         dir_path = game_dir / dir_name
@@ -1925,7 +1925,7 @@ def _detect_script_targets(script_path: Path, game_dir: Path) -> list[str]:
             dirs_found.add(dir_name)
 
     # Look for meta/0.papgt references
-    if re.search(r'meta[/\\]+0\.papgt', content, re.IGNORECASE):
+    if re.search(r'meta[//]+0\.papgt', content, re.IGNORECASE):
         if (game_dir / "meta" / "0.papgt").exists():
             targets.append("meta/0.papgt")
 
@@ -1953,8 +1953,8 @@ def _ensure_vanilla_backup(game_dir: Path, vanilla_dir: Path, rel_path: str) -> 
     Always a real copy — hard links are unsafe because script mods can
     modify the game file directly, which would corrupt a hard-linked backup.
     """
-    src = game_dir / rel_path.replace("/", "\\")
-    dst = vanilla_dir / rel_path.replace("/", "\\")
+    src = game_dir / rel_path.replace("/", "/")
+    dst = vanilla_dir / rel_path.replace("/", "/")
     if not dst.exists() and src.exists():
         dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src, dst)
@@ -1990,9 +1990,9 @@ def import_from_game_scan(
     mod_id = cursor.lastrowid
 
     for rel_path, _ in modified:
-        vanilla_path = game_dir / rel_path.replace("/", "\\")
+        vanilla_path = game_dir / rel_path.replace("/", "/")
         # We need the vanilla version — check the vanilla backup dir first
-        vanilla_backup = deltas_dir.parent / "vanilla" / rel_path.replace("/", "\\")
+        vanilla_backup = deltas_dir.parent / "vanilla" / rel_path.replace("/", "/")
 
         if vanilla_backup.exists():
             vanilla_bytes = vanilla_backup.read_bytes()

@@ -471,7 +471,7 @@ def _find_pamt_entry(game_file: str, game_dir: Path) -> PazEntry | None:
     Tries exact match, suffix match, and basename match (PAMT flattens
     directory structure, so mod paths may be deeper than PAMT paths).
     """
-    game_file_lower = game_file.lower().replace("\\", "/")
+    game_file_lower = game_file.lower().replace("/", "/")
     game_basename = game_file_lower.rsplit("/", 1)[-1]
 
     basename_match = None
@@ -485,7 +485,7 @@ def _find_pamt_entry(game_file: str, game_dir: Path) -> PazEntry | None:
         try:
             entries = parse_pamt(str(pamt), paz_dir=str(d))
             for e in entries:
-                ep = e.path.lower().replace("\\", "/")
+                ep = e.path.lower().replace("/", "/")
                 # Exact match
                 if ep == game_file_lower:
                     return e

@@ -164,7 +164,7 @@ def serialize_pathc(pathc: PathcFile) -> bytes:
 
 def normalize_path(path_str: str) -> str:
     """Normalize a virtual path for hashing: forward slashes, leading /."""
-    path = path_str.replace("\\", "/").strip().lstrip("/").strip("/")
+    path = path_str.replace("/", "/").strip().lstrip("/").strip("/")
     return "/" + path
 
 

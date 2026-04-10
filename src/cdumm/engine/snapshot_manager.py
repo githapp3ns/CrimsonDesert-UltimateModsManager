@@ -248,7 +248,7 @@ class SnapshotWorker(QObject):
             for backup in vanilla_dir.rglob("*"):
                 if not backup.is_file() or backup.name.endswith(".vranges"):
                     continue
-                rel = str(backup.relative_to(vanilla_dir)).replace("\\", "/")
+                rel = str(backup.relative_to(vanilla_dir)).replace("/", "/")
                 game_file = self._game_dir / rel.replace("/", os.sep)
                 if game_file.exists():
                     if game_file.stat().st_size != backup.stat().st_size:
@@ -351,7 +351,7 @@ class SnapshotManager:
         changes: list[tuple[str, str]] = []
         cursor = self._db.connection.execute("SELECT file_path, file_hash FROM snapshots")
         for rel_path, stored_hash in cursor.fetchall():
-            abs_path = game_dir / rel_path.replace("/", "\\")
+            abs_path = game_dir / rel_path.replace("/", "/")
             if not abs_path.exists():
                 changes.append((rel_path, "deleted"))
             else:

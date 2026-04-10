@@ -1,3 +1,4 @@
+from pathlib import Path
 """PAMT index parser for Crimson Desert PAZ archives.
 
 Parses .pamt files to discover file entries, their locations in PAZ archives,
@@ -136,7 +137,7 @@ def parse_pamt(pamt_path: str, paz_dir: str = None) -> list[PazEntry]:
         full_path = f"{folder_prefix}/{node_path}" if folder_prefix else node_path
 
         paz_num = int(pamt_stem) + paz_index
-        paz_file = os.path.join(paz_dir, f"{paz_num}.paz")
+        paz_file = Path(paz_dir, f"{paz_num}.paz")
 
         entries.append(PazEntry(
             path=full_path,

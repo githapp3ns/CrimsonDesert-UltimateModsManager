@@ -118,7 +118,7 @@ class PreHashWorker(QObject):
 
             pre_hashes: dict[str, str] = {}
             for i, rel_path in enumerate(all_files):
-                game_file = self._game_dir / rel_path.replace("/", "\\")
+                game_file = self._game_dir / rel_path.replace("/", "/")
                 if game_file.exists():
                     h, _ = _hash_file(game_file)
                     pre_hashes[rel_path] = h
@@ -313,7 +313,7 @@ class ScriptCaptureWorker(QObject):
                     self.progress_updated.emit(
                         pct, f"Checking {file_idx + 1}/{total_files}...")
 
-                game_file = self._game_dir / rel_path.replace("/", "\\")
+                game_file = self._game_dir / rel_path.replace("/", "/")
                 if not game_file.exists():
                     continue
 
@@ -390,11 +390,11 @@ class ScriptCaptureWorker(QObject):
                     pct = 70 + int((idx + 1) / len(other_files) * 20)
                     self.progress_updated.emit(pct, f"Delta: {rel_path}...")
 
-                    vanilla_path = vanilla_dir / rel_path.replace("/", "\\")
+                    vanilla_path = vanilla_dir / rel_path.replace("/", "/")
                     if not vanilla_path.exists():
                         continue
                     vanilla_bytes = vanilla_path.read_bytes()
-                    modified_bytes = (self._game_dir / rel_path.replace("/", "\\")).read_bytes()
+                    modified_bytes = (self._game_dir / rel_path.replace("/", "/")).read_bytes()
 
                     delta_bytes = generate_delta(vanilla_bytes, modified_bytes)
                     byte_ranges = ([(0, len(modified_bytes))]
@@ -695,7 +695,7 @@ class ScanChangesWorker(QObject):
             # Find changed files
             changed: list[str] = []
             for i, (rel_path, stored_hash) in enumerate(snapshot_rows):
-                abs_path = self._game_dir / rel_path.replace("/", "\\")
+                abs_path = self._game_dir / rel_path.replace("/", "/")
                 if not abs_path.exists():
                     continue
 
@@ -756,11 +756,11 @@ class ScanChangesWorker(QObject):
                     pct = 80 + int((idx + 1) / len(other_files) * 15)
                     self.progress_updated.emit(pct, f"Delta: {rel_path}...")
 
-                    vanilla_path = vanilla_dir / rel_path.replace("/", "\\")
+                    vanilla_path = vanilla_dir / rel_path.replace("/", "/")
                     if not vanilla_path.exists():
                         continue
                     vanilla_bytes = vanilla_path.read_bytes()
-                    modified_bytes = (self._game_dir / rel_path.replace("/", "\\")).read_bytes()
+                    modified_bytes = (self._game_dir / rel_path.replace("/", "/")).read_bytes()
 
                     delta_bytes = generate_delta(vanilla_bytes, modified_bytes)
                     byte_ranges = ([(0, len(modified_bytes))]
@@ -836,7 +836,7 @@ class BackupVerifyWorker(QObject):
             purged = 0
             for i, full in enumerate(backup_files):
                 pct = int((i / total) * 100)
-                rel = str(full.relative_to(self._vanilla_dir)).replace("\\", "/")
+                rel = str(full.relative_to(self._vanilla_dir)).replace("/", "/")
                 self.progress_updated.emit(pct, f"Verifying {rel}...")
 
                 snap = db.connection.execute(
