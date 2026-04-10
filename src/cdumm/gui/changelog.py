@@ -8,6 +8,31 @@ from PySide6.QtWidgets import (
 # Changelog entries — newest first. Add new versions at the top.
 CHANGELOG = [
     {
+        "version": "2.3.0",
+        "date": "2026-04-10",
+        "notes": [
+            "Apply now blocked when game files don't match vanilla snapshot. Prevents contaminated backups that poison the restore chain. Shows a clear error with instructions to verify through Steam and Fix Everything.",
+            "Fix Everything no longer deletes vanilla backups when you say No to Steam verify. Backups are only cleared after a confirmed Steam verification.",
+            "Backup refresh now hash-verifies game files against the snapshot before overwriting existing backups. Prevents modded files from replacing clean backups.",
+        ],
+    },
+    {
+        "version": "2.2.9",
+        "date": "2026-04-10",
+        "notes": [
+            "Fixed 'not applied' status for mods that modify game files without a vanilla snapshot. The status check now detects applied mods by the presence of vanilla backups. Fixes Barber Unlocked and similar mods showing 'not applied' even though they were correctly applied.",
+        ],
+    },
+    {
+        "version": "2.2.8",
+        "date": "2026-04-10",
+        "notes": [
+            "Hotfix: restricted mixed-format import to only trigger for mods with standalone PAZ directories alongside loose files. Prevents false triggers on normal mods with README/config files.",
+            "Narrowed loose file detection to .json and .xml only (removed .txt, .ini, .cfg, .csv that matched non-game files).",
+            "Fixed source archive being overwritten during second import pass.",
+        ],
+    },
+    {
         "version": "2.2.7",
         "date": "2026-04-10",
         "notes": [
