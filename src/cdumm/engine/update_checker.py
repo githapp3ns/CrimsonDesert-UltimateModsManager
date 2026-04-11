@@ -8,7 +8,7 @@ from PySide6.QtCore import QObject, Signal
 logger = logging.getLogger(__name__)
 
 GITHUB_REPO = "githapp3ns/CrimsonDesert-UltimateModsManager"
-RELEASES_URL = f"https://api.github.com/repos/{GITHUB_REPO}"
+RELEASES_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
 
 
 def check_for_update(current_version: str) -> dict | None:
