@@ -37,11 +37,11 @@ class ActivityPanel(QWidget):
 
         toolbar.addWidget(QLabel("Session:"))
         self._session_combo = QComboBox()
-        self._session_combo.setMinimumWidth(200)
+        self._session_combo.setMinimumWidth(150)
         self._session_combo.currentIndexChanged.connect(self._on_filter_changed)
         toolbar.addWidget(self._session_combo)
 
-        toolbar.addSpacing(12)
+        toolbar.addSpacing(4)
 
         self._search_input = QLineEdit()
         self._search_input.setPlaceholderText("Search logs...")
@@ -49,19 +49,19 @@ class ActivityPanel(QWidget):
         toolbar.addWidget(self._search_input)
 
         search_btn = QPushButton("Search")
-        search_btn.setFixedWidth(70)
+        search_btn.setFixedWidth(90)
         search_btn.clicked.connect(self._on_search)
         toolbar.addWidget(search_btn)
 
         clear_btn = QPushButton("Clear")
-        clear_btn.setFixedWidth(60)
+        clear_btn.setFixedWidth(90)
         clear_btn.clicked.connect(self._on_clear_search)
         toolbar.addWidget(clear_btn)
 
-        toolbar.addSpacing(12)
+        toolbar.addSpacing(4)
 
         export_btn = QPushButton("Export Log")
-        export_btn.setFixedWidth(90)
+        export_btn.setFixedWidth(120)
         export_btn.clicked.connect(self._on_export)
         toolbar.addWidget(export_btn)
 

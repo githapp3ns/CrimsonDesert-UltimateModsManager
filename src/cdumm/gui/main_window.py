@@ -1473,8 +1473,8 @@ class MainWindow(QMainWindow):
             ("tools.export_list", self._on_export_list),
             ("tools.import_list", self._on_import_list),
             ("tools.test_mod", self._on_test_mod),
-            ("tools.patch_notes", self._on_show_patch_notes),
-            ("tools.report_bug", self._on_report_bug),
+            #("tools.patch_notes", self._on_show_patch_notes),
+            #("tools.report_bug", self._on_report_bug),
         ]:
             btn = QPushButton(tr(tr_key))
             btn.setFixedHeight(36)
@@ -1515,7 +1515,7 @@ class MainWindow(QMainWindow):
         about_v.addWidget(links_label)
 
         for text, url in [
-            ("GitHub Releases — Download Latest", "https://github.com/https://api.github.com/repos/githapp3ns/CrimsonDesert-UltimateModsManager/releases/latest/releases"),
+            ("GitHub Releases — Download Latest", "https://github.com/githapp3ns/CrimsonDesert-UltimateModsManager"),
             ("Github (Original Author)", "https://github.com/faisalkindi/CrimsonDesert-UltimateModsManager"),
             ("NexusMods Page (Original Author)", "https://www.nexusmods.com/crimsondesert/mods/207"),
 
@@ -1627,11 +1627,11 @@ class MainWindow(QMainWindow):
                 # Wir öffnen einfach nur die Steam-App
                 # Der Nutzer startet das Spiel dann manuell in Steam
                 subprocess.Popen(["steam"])
-                self.statusBar().showMessage("Steam wird geöffnet... Bitte starte das Spiel dort.", 5000)
+                self.statusBar().showMessage("Opening Steam... Please launch the game manually from there.", 5000)
                 self.showMinimized()
                 return
             except Exception as e:
-                self.statusBar().showMessage(f"Steam konnte nicht gestartet werden: {e}", 10000)
+                self.statusBar().showMessage(f"Could not start Steam: {e}", 10000)
                 return
 
 
@@ -4061,27 +4061,32 @@ class MainWindow(QMainWindow):
         dialog = PatchNotesDialog(self, latest_only=True)
         dialog.exec()
 
-    # --- Bug Report ---
+    # --- Bug Report (Redirected to Logs) ---
     def _on_report_bug(self) -> None:
-        from cdumm.gui.bug_report import generate_bug_report, BugReportDialog
-        report = generate_bug_report(self._db, self._game_dir, self._app_data_dir)
-        dialog = BugReportDialog(report, self)
-        dialog.exec()
+        """Opens the local log folder directly instead of the bug report dialog."""
+        import subprocess
+        import os
+        try:
+            # Matches our CachyOS / Steam Deck path setup
+            log_path = os.path.expanduser("~/.local/share/cdumm")
+            if os.path.exists(log_path):
+                # 'setsid' ensures the file manager stays open even if the app closes
+                subprocess.Popen(["xdg-open", log_path], preexec_fn=os.setsid)
+            else:
+                QMessageBox.warning(self, "Information", f"Log folder not found at:\n{log_path}")
+        except Exception as e:
+            logger.error(f"Failed to open log folder: {e}")
 
     def _offer_crash_report(self) -> None:
+        """Asks the user if they want to view logs after a detected crash."""
         reply = QMessageBox.question(
-            self, "Previous Session Crashed",
-            "It looks like the app didn't close normally last time.\n"
-            "This could indicate a bug.\n\n"
-            "Would you like to generate a bug report?\n"
-            "(You can attach it to a Nexus Mods bug report)",
+            self, "Session Crash Detected",
+            "It looks like CDUMM didn't close correctly during the last session.\n\n"
+            "Would you like to open the log folder to investigate the cause?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         if reply == QMessageBox.StandardButton.Yes:
-            from cdumm.gui.bug_report import generate_bug_report, BugReportDialog
-            report = generate_bug_report(self._db, self._game_dir, self._app_data_dir)
-            dialog = BugReportDialog(report, self, is_crash=True)
-            dialog.exec()
+            self._on_report_bug() # Simply reuse the log folder logic
 
     # --- Profiles ---
     def _on_profiles(self) -> None:
