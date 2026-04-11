@@ -45,20 +45,36 @@ class ConflictView(QWidget):
         self._model.setHorizontalHeaderLabels(["Conflict", "Level", "Resolution"])
         self._tree.setModel(self._model)
         self._tree.header().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
-        self._tree.header().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        self._tree.header().setSectionResizeMode(1, QHeaderView.ResizeMode.Interactive)
+        self._tree.setColumnWidth(1, 220)
         self._tree.header().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
 
         layout.addWidget(self._tree)
 
     def update_conflicts(self, conflicts: list[Conflict]) -> None:
         """Rebuild the tree with the current conflict list."""
-        self._model.removeRows(0, self._model.rowCount())
+        self._tree.setUpdatesEnabled(False)
+        self._model.blockSignals(True)
 
-        if not conflicts:
-            empty = QStandardItem("No conflicts detected")
-            empty.setForeground(QColor("#4CAF50"))
-            self._model.appendRow([empty, QStandardItem(""), QStandardItem("")])
-            return
+        try:
+            self._model.removeRows(0, self._model.rowCount())
+
+            if not conflicts:
+                empty = QStandardItem("No conflicts detected")
+                empty.setForeground(QColor("#4CAF50"))
+                # Füge leere Items für die anderen Spalten hinzu, damit das Layout stimmt
+                self._model.appendRow([empty, QStandardItem(""), QStandardItem("")])
+            else:
+                # Hier käme dein normaler Loop für die Konflikte hin
+                for c in conflicts:
+                    # ... (dein restlicher Code zum Befüllen der Liste)
+                    pass
+        finally:
+            # Diese beiden Zeilen MÜSSEN am Ende stehen, damit die GUI aufwacht
+            self._model.blockSignals(False)
+            self._tree.setUpdatesEnabled(True)
+            # Erzwinge ein Neuzeichnen
+            self._tree.viewport().update()
 
         # Group by mod pair
         pairs: dict[tuple[int, int], list[Conflict]] = {}
@@ -90,7 +106,11 @@ class ConflictView(QWidget):
             if winner:
                 detail_item.setForeground(QColor("#4CAF50"))
 
-            for c in pair_conflicts:
+            # Cap child items to prevent Qt crash on large conflict sets.
+            # Show first 10 + summary if there are more.
+            MAX_CHILDREN = 10
+            shown = pair_conflicts[:MAX_CHILDREN]
+            for c in shown:
                 file_item = QStandardItem(c.file_path)
                 file_item.setData(c.mod_a_id, MOD_A_ID_ROLE)
                 file_item.setData(c.mod_b_id, MOD_B_ID_ROLE)
@@ -100,9 +120,18 @@ class ConflictView(QWidget):
                 file_detail = QStandardItem(c.explanation)
                 pair_item.appendRow([file_item, file_level, file_detail])
 
+            if len(pair_conflicts) > MAX_CHILDREN:
+                more = QStandardItem(f"... and {len(pair_conflicts) - MAX_CHILDREN} more")
+                more.setForeground(QColor("#666"))
+                pair_item.appendRow([more, QStandardItem(""), QStandardItem("")])
+
             self._model.appendRow([pair_item, level_item, detail_item])
 
-        self._tree.expandAll()
+        self._model.blockSignals(False)
+        self._model.layoutChanged.emit()
+        self._tree.setUpdatesEnabled(True)
+        if len(conflicts) <= 50:
+            self._tree.expandAll()
 
     def _show_context_menu(self, pos) -> None:
         """Show right-click menu with Set Winner options."""
